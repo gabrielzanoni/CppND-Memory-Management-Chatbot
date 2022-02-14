@@ -11,17 +11,12 @@
 #include "chatbot.h"
 #include "chatlogic.h"
 
+const std::string chatbot_image_file = "../images/chatbot.png";
 
 ChatLogic::ChatLogic()
 {
     //// STUDENT CODE
     ////
-
-    // create instance of chatbot
-    _chatBot = new ChatBot("../images/chatbot.png");
-
-    // add pointer to chatlogic so that chatbot answers can be passed on to the GUI
-    _chatBot->SetChatLogicHandle(this);
 
     ////
     //// EOF STUDENT CODE
@@ -31,9 +26,6 @@ ChatLogic::~ChatLogic()
 {
     //// STUDENT CODE
     ////
-
-    // delete chatbot instance
-    delete _chatBot;
 
     ////
     //// EOF STUDENT CODE
@@ -321,9 +313,16 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
         }
     }
 
-    // add chatbot to graph root node
-    _chatBot->SetRootNode(rootNode);
-    rootNode->MoveChatbotHere(_chatBot);
+    // create instance of chatbot
+    ChatBot chatBotInStack(chatbot_image_file);
+
+    // add pointer to chatlogic so that chatbot answers can be passed on to the GUI
+    chatBotInStack.SetChatLogicHandle(this);
+    chatBotInStack.SetRootNode(rootNode);
+
+    _chatBot = &chatBotInStack;
+
+    rootNode->MoveChatbotHere(std::move(chatBotInStack));
     
     ////
     //// EOF STUDENT CODE

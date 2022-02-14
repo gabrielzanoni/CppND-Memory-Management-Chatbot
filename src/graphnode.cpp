@@ -26,11 +26,9 @@ GraphNode::GraphNode(const GraphNode &source)
     }
 
     _parentEdges = source._parentEdges;
-    _chatBot = source._chatBot;
+    _chatBot = std::move(source._chatBot);
     _id = source._id;
     _answers = source._answers;
-
-    return this;
 }
 
 GraphNode& GraphNode::operator=(const GraphNode &source)
@@ -44,7 +42,6 @@ GraphNode& GraphNode::operator=(const GraphNode &source)
     _childEdges.clear();
     _parentEdges.clear();
     _answers.clear();
-    _chatBot = nullptr;
     _id = 0;
 
     for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
@@ -53,7 +50,7 @@ GraphNode& GraphNode::operator=(const GraphNode &source)
     }
 
     _parentEdges = source._parentEdges;
-    _chatBot = source._chatBot;
+    _chatBot = std::move(source._chatBot);
     _id = source._id;
     _answers = source._answers;
 
@@ -70,14 +67,13 @@ GraphNode::GraphNode(GraphNode &&source)
     }
 
     _parentEdges = source._parentEdges;
-    _chatBot = source._chatBot;
+    _chatBot = std::move(source._chatBot);
     _id = source._id;
     _answers = source._answers;
 
     source._childEdges.clear();
     source._parentEdges.clear();
     source._answers.clear();
-    source._chatBot = nullptr;
     source._id = 0;
 }
 
@@ -92,7 +88,6 @@ GraphNode& GraphNode::operator=(GraphNode &&source)
     _childEdges.clear();
     _parentEdges.clear();
     _answers.clear();
-    _chatBot = nullptr;
     _id = 0;
 
     for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
@@ -101,14 +96,13 @@ GraphNode& GraphNode::operator=(GraphNode &&source)
     }
 
     _parentEdges = source._parentEdges;
-    _chatBot = source._chatBot;
+    _chatBot = std::move(source._chatBot);
     _id = source._id;
     _answers = source._answers;
 
     source._childEdges.clear();
     source._parentEdges.clear();
     source._answers.clear();
-    source._chatBot = nullptr;
     source._id = 0;
 
     return *this;
@@ -131,16 +125,15 @@ void GraphNode::AddEdgeToChildNode(std::unique_ptr<GraphEdge> edge)
 
 //// STUDENT CODE
 ////
-void GraphNode::MoveChatbotHere(ChatBot *chatbot)
+void GraphNode::MoveChatbotHere(ChatBot chatbot)
 {
-    _chatBot = chatbot;
-    _chatBot->SetCurrentNode(this);
+    _chatBot = std::move(chatbot);
+    _chatBot.SetCurrentNode(this);
 }
 
 void GraphNode::MoveChatbotToNewNode(GraphNode *newNode)
 {
-    newNode->MoveChatbotHere(_chatBot);
-    _chatBot = nullptr; // invalidate pointer at source
+    newNode->MoveChatbotHere(std::move(_chatBot));
 }
 ////
 //// EOF STUDENT CODE
