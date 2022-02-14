@@ -16,10 +16,10 @@ private:
     ////
 
     // data handles (owned)
-    std::vector<GraphEdge *> _childEdges;  // edges to subsequent nodes
+    std::vector<std::unique_ptr<GraphEdge>> _childEdges;  // edges to subsequent nodes
 
     // data handles (not owned)
-    std::vector<GraphEdge *> _parentEdges; // edges to preceding nodes 
+    std::vector<std::weak_ptr<GraphEdge>> _parentEdges; // edges to preceding nodes 
     ChatBot *_chatBot;
 
     ////
@@ -33,6 +33,10 @@ public:
     // constructor / destructor
     GraphNode(int id);
     ~GraphNode();
+    GraphNode(const GraphNode &source);
+    GraphNode &operator=(const GraphNode &source);
+    GraphNode(GraphNode &&source);
+    GraphNode &operator=(GraphNode &&source);
 
     // getter / setter
     int GetID() { return _id; }
@@ -43,8 +47,8 @@ public:
 
     // proprietary functions
     void AddToken(std::string token); // add answers to list
-    void AddEdgeToParentNode(GraphEdge *edge);
-    void AddEdgeToChildNode(GraphEdge *edge);
+    void AddEdgeToParentNode(std::weak_ptr<GraphEdge> edge);
+    void AddEdgeToChildNode(std::unique_ptr<GraphEdge> edge);
 
     //// STUDENT CODE
     ////

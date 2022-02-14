@@ -1,3 +1,4 @@
+#include <iostream>
 #include "graphedge.h"
 #include "graphnode.h"
 
@@ -15,19 +16,117 @@ GraphNode::~GraphNode()
     //// EOF STUDENT CODE
 }
 
+GraphNode::GraphNode(const GraphNode &source)
+{
+    std::cout << "GraphNode: COPYING content of instance " << &source << " to instane " << this << std::endl;
+
+    for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
+        GraphEdge node = *(*it);
+        _childEdges.push_back(std::move(std::make_unique<GraphEdge>(node.GetID())));
+    }
+
+    _parentEdges = source._parentEdges;
+    _chatBot = source._chatBot;
+    _id = source._id;
+    _answers = source._answers;
+
+    return this;
+}
+
+GraphNode& GraphNode::operator=(const GraphNode &source)
+{
+    std::cout << "GraphNode: ASSIGNING content of instance " << &source << " to instane " << this << std::endl;
+
+    if (this == &source) {
+        return *this;
+    }
+
+    _childEdges.clear();
+    _parentEdges.clear();
+    _answers.clear();
+    _chatBot = nullptr;
+    _id = 0;
+
+    for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
+        GraphEdge node = *(*it);
+        _childEdges.push_back(std::move(std::make_unique<GraphEdge>(node.GetID())));
+    }
+
+    _parentEdges = source._parentEdges;
+    _chatBot = source._chatBot;
+    _id = source._id;
+    _answers = source._answers;
+
+    return *this;
+}
+
+GraphNode::GraphNode(GraphNode &&source)
+{
+    std::cout << "GraphNode: MOVING (constructor) content of instance " << &source << " to instane " << this << std::endl;
+
+    for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
+        GraphEdge node = *(*it);
+        _childEdges.push_back(std::move(std::make_unique<GraphEdge>(node.GetID())));
+    }
+
+    _parentEdges = source._parentEdges;
+    _chatBot = source._chatBot;
+    _id = source._id;
+    _answers = source._answers;
+
+    source._childEdges.clear();
+    source._parentEdges.clear();
+    source._answers.clear();
+    source._chatBot = nullptr;
+    source._id = 0;
+}
+
+GraphNode& GraphNode::operator=(GraphNode &&source)
+{
+    std::cout << "GraphNode: MOVING (assignment) content of instance " << &source << " to instane " << this << std::endl;
+
+    if (this == &source) {
+        return *this;
+    }
+
+    _childEdges.clear();
+    _parentEdges.clear();
+    _answers.clear();
+    _chatBot = nullptr;
+    _id = 0;
+
+    for (auto it = std::begin(source._childEdges); it != std::end(source._childEdges); ++it) {
+        GraphEdge node = *(*it);
+        _childEdges.push_back(std::move(std::make_unique<GraphEdge>(node.GetID())));
+    }
+
+    _parentEdges = source._parentEdges;
+    _chatBot = source._chatBot;
+    _id = source._id;
+    _answers = source._answers;
+
+    source._childEdges.clear();
+    source._parentEdges.clear();
+    source._answers.clear();
+    source._chatBot = nullptr;
+    source._id = 0;
+
+    return *this;
+}
+
 void GraphNode::AddToken(std::string token)
 {
     _answers.push_back(token);
 }
 
-void GraphNode::AddEdgeToParentNode(GraphEdge *edge)
+void GraphNode::AddEdgeToParentNode(std::weak_ptr<GraphEdge> edge)
 {
     _parentEdges.push_back(edge);
 }
 
-void GraphNode::AddEdgeToChildNode(GraphEdge *edge)
+void GraphNode::AddEdgeToChildNode(std::unique_ptr<GraphEdge> edge)
 {
-    _childEdges.push_back(edge);
+    _childEdges.push_back(std::move(edge));
 }
 
 //// STUDENT CODE
@@ -51,7 +150,7 @@ GraphEdge *GraphNode::GetChildEdgeAtIndex(int index)
     //// STUDENT CODE
     ////
 
-    return _childEdges[index];
+    return _childEdges[index].get();
 
     ////
     //// EOF STUDENT CODE
