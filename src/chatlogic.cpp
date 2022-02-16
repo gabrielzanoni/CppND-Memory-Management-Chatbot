@@ -13,23 +13,9 @@
 
 const std::string chatbot_image_file = "../images/chatbot.png";
 
-ChatLogic::ChatLogic()
-{
-    //// STUDENT CODE
-    ////
+ChatLogic::ChatLogic() {}
 
-    ////
-    //// EOF STUDENT CODE
-}
-
-ChatLogic::~ChatLogic()
-{
-    //// STUDENT CODE
-    ////
-
-    ////
-    //// EOF STUDENT CODE
-}
+ChatLogic::~ChatLogic() {}
 
 ChatLogic::ChatLogic(const ChatLogic &source)
 {
@@ -39,12 +25,6 @@ ChatLogic::ChatLogic(const ChatLogic &source)
     {
         GraphNode node = *(*it);
         _nodes.push_back(std::move(std::make_unique<GraphNode>(node.GetID())));
-    }
-
-    for (auto it = std::begin(source._edges); it != std::end(source._edges); it++)
-    {
-        GraphEdge *edge = *it;
-        _edges.push_back(edge);
     }
 
     _currentNode = source._currentNode;
@@ -64,18 +44,11 @@ ChatLogic& ChatLogic::operator=(const ChatLogic &source)
     _panelDialog = nullptr;
 
     _nodes.clear();
-    _edges.clear();
 
     for (auto it = std::begin(source._nodes); it != std::end(source._nodes); ++it)
     {
         GraphNode node = *(*it);
         _nodes.push_back(std::move(std::make_unique<GraphNode> (node.GetID())));
-    }
-
-    for (auto it = std::begin(source._edges); it != std::end(source._edges); it++)
-    {
-        GraphEdge *edge = *it;
-        _edges.push_back(edge);
     }
 
     _currentNode = source._currentNode;
@@ -93,12 +66,6 @@ ChatLogic::ChatLogic(ChatLogic &&source)
     {
         std::unique_ptr<GraphNode> node = std::move(*it);
         _nodes.push_back(std::move(node));
-    }
-
-    for (auto it = std::begin(source._edges); it != std::end(source._edges); it++)
-    {
-        GraphEdge *edge = *it;
-        _edges.push_back(edge);
     }
 
     _currentNode = source._currentNode;
@@ -122,18 +89,11 @@ ChatLogic& ChatLogic::operator=(ChatLogic &&source)
     _panelDialog = nullptr;
 
     _nodes.clear();
-    _edges.clear();
 
     for (auto it = std::begin(source._nodes); it != std::end(source._nodes); ++it)
     {
         std::unique_ptr<GraphNode> node = std::move(*it);
         _nodes.push_back(std::move(node));
-    }
-
-    for (auto it = std::begin(source._edges); it != std::end(source._edges); it++)
-    {
-        GraphEdge *edge = *it;
-        _edges.push_back(edge);
     }
 
     _currentNode = source._currentNode;
@@ -256,19 +216,16 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
                             auto childNode = std::find_if(_nodes.begin(), _nodes.end(), [&childToken](std::unique_ptr<GraphNode> &node) { return node->GetID() == std::stoi(childToken->second); });
 
                             // create new edge
-                            GraphEdge *edge = new GraphEdge(id);
+                            std::unique_ptr<GraphEdge> edge = std::make_unique<GraphEdge>(id);
                             edge->SetChildNode((*childNode).get());
                             edge->SetParentNode((*parentNode).get());
-                            _edges.push_back(edge);
 
                             // find all keywords for current node
                             AddAllTokensToElement("KEYWORD", tokens, *edge);
 
                             // store reference in child node and parent node
-                            std::shared_ptr<GraphEdge> sharedEdge(edge);
-                            std::weak_ptr<GraphEdge> weakEdge(sharedEdge);
-                            (*childNode)->AddEdgeToParentNode(weakEdge);
-                            (*parentNode)->AddEdgeToChildNode(std::make_unique<GraphEdge>(edge->GetID()));
+                            (*childNode)->AddEdgeToParentNode(edge.get());
+                            (*parentNode)->AddEdgeToChildNode(std::move(edge));
                         }
 
                         ////
@@ -304,7 +261,7 @@ void ChatLogic::LoadAnswerGraphFromFile(std::string filename)
 
             if (rootNode == nullptr)
             {
-                rootNode = (*it).get(); // assign current node to root
+                rootNode = it->get(); // assign current node to root
             }
             else
             {
